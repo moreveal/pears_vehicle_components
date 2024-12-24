@@ -3,7 +3,7 @@
 	url = https://github.com/openmultiplayer/open.mp-sdk/
 [submodule "third-party/pawn-natives"]
 	path = third-party/pawn-natives
-	url = https://github.com/openmultiplayer/pawn-natives/
+	url = https://github.com/openmultiplayer/pawn-natives
 [submodule "third-party/pawn"]
 	path = third-party/pawn
 	url = https://github.com/openmultiplayer/compiler
