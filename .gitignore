@@ -1,0 +1,4 @@
+third-party/
+cmake-build-release/
+cmake-build-debug/
+.idea/
