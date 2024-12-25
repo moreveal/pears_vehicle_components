@@ -32,8 +32,6 @@ public:
     // Inherited from PoolEventHandler<IVehicle>
     void onPoolEntryCreated(IVehicle& vehicle) override;
 
-    IVehiclesComponent* getVehicles();
-
     static PluginComponent *instance();
 
     ~PluginComponent();

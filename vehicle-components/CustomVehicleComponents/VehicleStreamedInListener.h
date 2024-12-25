@@ -33,7 +33,7 @@ namespace CustomVehicleComponents {
         std::unordered_map<IPlayer*, std::unordered_set<IVehicle*>> wPlayers;
 
         IPlayerPool* players_pool = nullptr;
-        IVehiclesComponent* vehicles_component;
+        IVehiclesComponent* vehicles;
     };
 }
 

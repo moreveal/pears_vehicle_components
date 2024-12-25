@@ -8,7 +8,6 @@
 namespace CustomVehicleComponents {
     bool VehicleStreamedInListener::onSend(IPlayer *peer, NetworkBitStream &bs) {
         if (peer == nullptr) return true;
-        auto* vehicles = PluginComponent::instance()->getVehicles();
         if (vehicles == nullptr) return true;
 
         bs.resetReadPointer();
@@ -26,9 +25,9 @@ namespace CustomVehicleComponents {
     void VehicleStreamedInListener::onTick(Microseconds elapsed, TimePoint now) {
         for (auto it = wPlayers.begin(); it != wPlayers.end(); ) {
             auto* peer = it->first;
-            auto& vehicles = it->second;
+            auto& peer_vehicles = it->second;
 
-            for (auto vehicle : vehicles)
+            for (auto vehicle : peer_vehicles)
             {
                 auto vehicleExtension = queryExtension<VehicleExtension>(vehicle);
                 if (vehicleExtension == nullptr || !vehicle->isStreamedInForPlayer(*peer)) {
@@ -57,11 +56,11 @@ namespace CustomVehicleComponents {
 
     void VehicleStreamedInListener::onPoolEntryDestroyed(IVehicle &vehicle) {
         for (auto it = wPlayers.begin(); it != wPlayers.end(); ) {
-            auto& vehicles = it->second;
+            auto& peer_vehicles = it->second;
 
-            vehicles.erase(&vehicle);
+            peer_vehicles.erase(&vehicle);
 
-            if (vehicles.empty()) {
+            if (peer_vehicles.empty()) {
                 it = wPlayers.erase(it);
             } else {
                 ++it;
@@ -78,10 +77,10 @@ namespace CustomVehicleComponents {
     }
 
     void VehicleStreamedInListener::onLoad(ICore *icore, IComponentList *components) {
-        vehicles_component = components->queryComponent<IVehiclesComponent>();
-        if (vehicles_component)
+        vehicles = components->queryComponent<IVehiclesComponent>();
+        if (vehicles)
         {
-            vehicles_component->getPoolEventDispatcher().addEventHandler(this);
+            vehicles->getPoolEventDispatcher().addEventHandler(this);
         }
 
         core->getEventDispatcher().addEventHandler(this);
@@ -90,7 +89,7 @@ namespace CustomVehicleComponents {
     }
 
     VehicleStreamedInListener::~VehicleStreamedInListener() {
-        if (vehicles_component) vehicles_component->getPoolEventDispatcher().removeEventHandler(this);
+        if (vehicles) vehicles->getPoolEventDispatcher().removeEventHandler(this);
         if (players_pool) players_pool->getPoolEventDispatcher().removeEventHandler(this);
         if (core) core->getEventDispatcher().removeEventHandler(this);
     }

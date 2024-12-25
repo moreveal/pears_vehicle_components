@@ -76,8 +76,4 @@ PluginComponent::~PluginComponent() {
     if (pawnComponent) pawnComponent->getEventDispatcher().removeEventHandler(this);
 }
 
-IVehiclesComponent *PluginComponent::getVehicles() {
-    return vehicles_;
-}
-
 COMPONENT_ENTRY_POINT() { return PluginComponent::instance(); }
