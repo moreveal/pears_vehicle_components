@@ -3,20 +3,23 @@
 #include "VehicleExtension.h"
 
 namespace CustomVehicleComponents {
-    SCRIPT_API(AddVehicleCustomComponent, void(IVehicle& vehicle, uint32_t component)) {
+    SCRIPT_API(AddVehicleCustomComponent, bool(IVehicle& vehicle, uint32_t component)) {
         auto vehicleExtension = queryExtension<VehicleExtension>(&vehicle);
         if (vehicleExtension == nullptr) {
-            return vehicle.addComponent(static_cast<int>(component));
+            vehicle.addComponent(static_cast<int>(component));
+        } else {
+            vehicleExtension->addCustomComponent(component);
         }
-        vehicleExtension->addCustomComponent(vehicle, component);
+        return true;
     }
 
-    SCRIPT_API(RemoveVehicleCustomComponent, void(IVehicle& vehicle, uint32_t component)) {
+    SCRIPT_API(RemoveVehicleCustomComponent, bool(IVehicle& vehicle, uint32_t component)) {
         auto vehicleExtension = queryExtension<VehicleExtension>(&vehicle);
         if (vehicleExtension != nullptr) {
-            vehicleExtension->removeCustomComponent(vehicle, component);
+            vehicleExtension->removeCustomComponent(component);
         }
         vehicle.removeComponent(static_cast<int>(component));
+        return true;
     }
 
     SCRIPT_API(GetVehicleCustomComponentInSlot, int(IVehicle& vehicle, int slot)) {
@@ -31,8 +34,9 @@ namespace CustomVehicleComponents {
         return getCustomComponentSlot(component);
     }
 
-    SCRIPT_API(SetVehicleCustomComponentType, void(uint32_t component, int slot)) {
-        return setCustomComponentSlot(component, slot);
+    SCRIPT_API(SetVehicleCustomComponentType, bool(uint32_t component, int slot)) {
+        setCustomComponentSlot(component, slot);
+        return true;
     }
 
     SCRIPT_API(IsVehicleCustomComponent, bool(uint32_t component)) {

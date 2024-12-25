@@ -68,7 +68,7 @@ PluginComponent *PluginComponent::instance() {
 
 void PluginComponent::onPoolEntryCreated(IVehicle &vehicle) {
     using namespace CustomVehicleComponents;
-    vehicle.addExtension(new VehicleExtension(), true);
+    vehicle.addExtension(new VehicleExtension(&vehicle), true);
 }
 
 PluginComponent::~PluginComponent() {

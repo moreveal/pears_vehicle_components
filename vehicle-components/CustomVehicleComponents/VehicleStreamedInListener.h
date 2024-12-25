@@ -3,12 +3,37 @@
 
 #include "network.hpp"
 #include "packet.hpp"
+#include "Server/Components/Vehicles/vehicles.hpp"
+#include <unordered_set>
 
 namespace CustomVehicleComponents {
-    struct VehicleStreamedInListener : SingleNetworkOutEventHandler {
+    struct VehicleStreamedInListener :
+            SingleNetworkOutEventHandler, CoreEventHandler,
+            PoolEventHandler<IPlayer>, PoolEventHandler<IVehicle> {
+    public:
         static constexpr int kRpcId = 164;
 
+        void onLoad(ICore* icore, IComponentList* components);
+
+        // Inherited from SingleNetworkOutEventHandler
         bool onSend(IPlayer* peer, NetworkBitStream& bs) override;
+
+        // Inherited from CoreEventHandler
+        void onTick(Microseconds elapsed, TimePoint now) override;
+
+        // Inherited from PoolEventHandler<IPlayer>
+        void onPoolEntryDestroyed(IPlayer& player) override;
+
+        // Inherited from PoolEventHandler<IVehicle>
+        void onPoolEntryDestroyed(IVehicle& vehicle) override;
+
+        ~VehicleStreamedInListener();
+
+    private:
+        std::unordered_map<IPlayer*, std::unordered_set<IVehicle*>> wPlayers;
+
+        IPlayerPool* players_pool = nullptr;
+        IVehiclesComponent* vehicles_component;
     };
 }
 

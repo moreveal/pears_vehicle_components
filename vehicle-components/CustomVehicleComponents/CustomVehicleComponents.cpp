@@ -15,6 +15,8 @@ namespace CustomVehicleComponents {
                 network->getPerRPCOutEventDispatcher().addEventHandler(&vehicleStreamedInListener, CustomVehicleComponents::VehicleStreamedInListener::kRpcId, EventPriority_Highest);
             }
         }
+
+        vehicleStreamedInListener.onLoad(icore, components);
     }
 
     void unload() {

@@ -5,9 +5,6 @@
 #include "CustomVehicleComponents.h"
 #include "VehicleExtension.h"
 
-#include <thread>
-#include <chrono>
-
 namespace CustomVehicleComponents {
     bool VehicleStreamedInListener::onSend(IPlayer *peer, NetworkBitStream &bs) {
         if (peer == nullptr) return true;
@@ -22,32 +19,80 @@ namespace CustomVehicleComponents {
         auto* vehicle = vehicles->get(vehicleid);
         if (vehicle == nullptr) return true;
 
-        std::thread([peer, vehicle](){
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-            if (!vehicle->isStreamedInForPlayer(*peer)) return;
-
-            auto vehicleExtension = queryExtension<VehicleExtension>(vehicle);
-            if (vehicleExtension == nullptr) return;
-
-            const auto& custom_mods = vehicleExtension->getCustomComponents(*vehicle);
-            for (size_t i = 0; i < MAX_VEHICLE_COMPONENT_SLOT; i++)
-            {
-                const auto mod = custom_mods[i];
-                if (mod == INVALID_COMPONENT_ID) continue;
-
-                NetworkBitStream send_bs;
-                send_bs.writeUINT16(INVALID_PLAYER_ID); // PlayerID
-                send_bs.writeUINT32(static_cast<uint32_t>(VehicleSCMEvent_AddComponent)); // EventType
-                send_bs.writeUINT32(vehicle->getID()); // VehicleID
-                send_bs.writeUINT32(mod); // Arg1
-                send_bs.writeUINT32(0); // Arg2
-
-                peer->sendRPC(96, Span<uint8_t>(send_bs.GetData(), send_bs.GetNumberOfBitsUsed()), OrderingChannel_SyncRPC);
-            }
-        }).detach();
-
+        wPlayers[peer].insert(vehicle);
         return true;
+    }
+
+    void VehicleStreamedInListener::onTick(Microseconds elapsed, TimePoint now) {
+        for (auto it = wPlayers.begin(); it != wPlayers.end(); ) {
+            auto* peer = it->first;
+            auto& vehicles = it->second;
+
+            for (auto vehicle : vehicles)
+            {
+                auto vehicleExtension = queryExtension<VehicleExtension>(vehicle);
+                if (vehicleExtension == nullptr || !vehicle->isStreamedInForPlayer(*peer)) {
+                    ++it;
+                    continue;
+                }
+
+                const auto& custom_mods = vehicleExtension->getCustomComponents();
+                for (const auto mod : custom_mods) {
+                    if (mod == INVALID_COMPONENT_ID) continue;
+
+                    NetworkBitStream send_bs;
+                    send_bs.writeUINT16(INVALID_PLAYER_ID); // PlayerID
+                    send_bs.writeUINT32(static_cast<uint32_t>(VehicleSCMEvent_AddComponent)); // EventType
+                    send_bs.writeUINT32(vehicle->getID()); // VehicleID
+                    send_bs.writeUINT32(mod); // Arg1
+                    send_bs.writeUINT32(0); // Arg2
+
+                    peer->sendRPC(96, Span<uint8_t>(send_bs.GetData(), send_bs.GetNumberOfBitsUsed()), OrderingChannel_SyncRPC);
+                }
+            }
+
+            it = wPlayers.erase(it);
+        }
+    }
+
+    void VehicleStreamedInListener::onPoolEntryDestroyed(IVehicle &vehicle) {
+        for (auto it = wPlayers.begin(); it != wPlayers.end(); ) {
+            auto& vehicles = it->second;
+
+            vehicles.erase(&vehicle);
+
+            if (vehicles.empty()) {
+                it = wPlayers.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    void VehicleStreamedInListener::onPoolEntryDestroyed(IPlayer &player) {
+        auto it = wPlayers.find(&player);
+        if (it != wPlayers.end())
+        {
+            wPlayers.erase(it);
+        }
+    }
+
+    void VehicleStreamedInListener::onLoad(ICore *icore, IComponentList *components) {
+        vehicles_component = components->queryComponent<IVehiclesComponent>();
+        if (vehicles_component)
+        {
+            vehicles_component->getPoolEventDispatcher().addEventHandler(this);
+        }
+
+        core->getEventDispatcher().addEventHandler(this);
+        players_pool = &icore->getPlayers();
+        players_pool->getPoolEventDispatcher().addEventHandler(this);
+    }
+
+    VehicleStreamedInListener::~VehicleStreamedInListener() {
+        if (vehicles_component) vehicles_component->getPoolEventDispatcher().removeEventHandler(this);
+        if (players_pool) players_pool->getPoolEventDispatcher().removeEventHandler(this);
+        if (core) core->getEventDispatcher().removeEventHandler(this);
     }
 }
 
