@@ -7,16 +7,16 @@ namespace CustomVehicleComponents {
     struct VehicleExtension : IVehicleExtension {
     private:
         StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT> mods{};
-        IVehicle* vehicle = nullptr;
+        IVehicle& vehicle;
     public:
-        VehicleExtension() = default;
-        VehicleExtension(IVehicle* vehicle_) : vehicle(vehicle_) {}
-        virtual ~VehicleExtension() = default;
+        VehicleExtension(IVehicle& vehicle_) : vehicle(vehicle_) {
+          mods.fill(0);
+        }
 
         bool addCustomComponent(uint32_t component) override;
         int getCustomComponentInSlot(int slot) override;
         bool removeCustomComponent(uint32_t component) override;
-        StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT> getCustomComponents() override;
+        const StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT>& getCustomComponents() const override;
 
         // Inherited from IExtension
         void freeExtension() override;

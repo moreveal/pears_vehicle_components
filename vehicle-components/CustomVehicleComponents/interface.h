@@ -10,7 +10,7 @@ namespace CustomVehicleComponents {
         virtual bool addCustomComponent(uint32_t component) = 0;
         virtual int getCustomComponentInSlot(int slot) = 0;
         virtual bool removeCustomComponent(uint32_t component) = 0;
-        virtual StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT> getCustomComponents() = 0;
+        virtual const StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT>& getCustomComponents() const = 0;
     };
 }
 

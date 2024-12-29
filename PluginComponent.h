@@ -33,8 +33,6 @@ public:
     void onPoolEntryCreated(IVehicle& vehicle) override;
 
     static PluginComponent *instance();
-
-    ~PluginComponent();
 };
 
 #endif //PEARS_VEHICLE_COMPONENTS_PLUGINCOMPONENT_H

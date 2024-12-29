@@ -49,6 +49,8 @@ void PluginComponent::onFree(IComponent *component) {
         pawnComponent = nullptr;
         setAmxFunctions();
         setAmxLookups();
+    } else if (component == vehicles_) {
+      vehicles_ = nullptr;
     }
     componentsUnloadComponent(component);
 }
@@ -59,6 +61,8 @@ void PluginComponent::reset() {
 
 void PluginComponent::free() {
     componentsUnload();
+    if (vehicles_) vehicles_->getPoolEventDispatcher().removeEventHandler(this);
+    if (pawnComponent) pawnComponent->getEventDispatcher().removeEventHandler(this);
 }
 
 PluginComponent *PluginComponent::instance() {
@@ -68,12 +72,7 @@ PluginComponent *PluginComponent::instance() {
 
 void PluginComponent::onPoolEntryCreated(IVehicle &vehicle) {
     using namespace CustomVehicleComponents;
-    vehicle.addExtension(new VehicleExtension(&vehicle), true);
-}
-
-PluginComponent::~PluginComponent() {
-    if (vehicles_) vehicles_->getPoolEventDispatcher().removeEventHandler(this);
-    if (pawnComponent) pawnComponent->getEventDispatcher().removeEventHandler(this);
+    vehicle.addExtension(new VehicleExtension(vehicle), true);
 }
 
 COMPONENT_ENTRY_POINT() { return PluginComponent::instance(); }

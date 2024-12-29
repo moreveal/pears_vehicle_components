@@ -18,11 +18,11 @@ namespace CustomVehicleComponents {
         NetworkBitStream bs;
         bs.writeUINT16(INVALID_PLAYER_ID); // PlayerID
         bs.writeUINT32(static_cast<uint32_t>(VehicleSCMEvent_AddComponent)); // EventType
-        bs.writeUINT32(vehicle->getID()); // VehicleID
+        bs.writeUINT32(vehicle.getID()); // VehicleID
         bs.writeUINT32(component); // Arg1
         bs.writeUINT32(0); // Arg2
 
-        for (auto* peer : vehicle->streamedForPlayers())
+        for (auto* peer : vehicle.streamedForPlayers())
         {
             peer->sendRPC(96, Span<uint8_t>(bs.GetData(), bs.GetNumberOfBitsUsed()), OrderingChannel_SyncRPC);
         }
@@ -48,9 +48,9 @@ namespace CustomVehicleComponents {
         }
 
         NetworkBitStream bs;
-        bs.writeUINT16(vehicle->getID());
+        bs.writeUINT16(vehicle.getID());
         bs.writeUINT16(component);
-        for (auto* peer : vehicle->streamedForPlayers())
+        for (auto* peer : vehicle.streamedForPlayers())
         {
             peer->sendRPC(57, Span<uint8_t>(bs.GetData(), bs.GetNumberOfBitsUsed()), OrderingChannel_SyncRPC);
         }
@@ -58,7 +58,7 @@ namespace CustomVehicleComponents {
         return true;
     }
 
-    StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT> VehicleExtension::getCustomComponents() {
+    const StaticArray<uint32_t, MAX_VEHICLE_COMPONENT_SLOT>& VehicleExtension::getCustomComponents() const {
         return mods;
     }
 }
