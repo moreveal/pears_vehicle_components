@@ -14,6 +14,7 @@ namespace CustomVehicleComponents {
         static constexpr int kRpcId = 164;
 
         void onLoad(ICore* icore, IComponentList* components);
+        void onFree(IComponent* component);
 
         // Inherited from SingleNetworkOutEventHandler
         bool onSend(IPlayer* peer, NetworkBitStream& bs) override;

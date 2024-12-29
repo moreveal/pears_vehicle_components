@@ -34,7 +34,7 @@ namespace CustomVehicleComponents {
 
     void unloadComponent(IComponent* component)
     {
-        /* Nothing to do */
+      vehicleStreamedInListener.onFree(component);
     }
 
     void setCustomComponentSlot(uint32_t component, int slot)

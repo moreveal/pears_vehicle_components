@@ -88,6 +88,12 @@ namespace CustomVehicleComponents {
         players_pool->getPoolEventDispatcher().addEventHandler(this);
     }
 
+    void VehicleStreamedInListener::onFree(IComponent *component) {
+      if (component == vehicles) {
+        vehicles = nullptr;
+      }
+    }
+
     VehicleStreamedInListener::~VehicleStreamedInListener() {
         if (vehicles) vehicles->getPoolEventDispatcher().removeEventHandler(this);
         if (players_pool) players_pool->getPoolEventDispatcher().removeEventHandler(this);
