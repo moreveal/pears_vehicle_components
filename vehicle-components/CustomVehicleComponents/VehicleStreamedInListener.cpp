@@ -27,11 +27,9 @@ namespace CustomVehicleComponents {
             auto* peer = it->first;
             auto& peer_vehicles = it->second;
 
-            for (auto vehicle : peer_vehicles)
-            {
+            for (auto vehicle : peer_vehicles) {
                 auto vehicleExtension = queryExtension<VehicleExtension>(vehicle);
                 if (vehicleExtension == nullptr || !vehicle->isStreamedInForPlayer(*peer)) {
-                    ++it;
                     continue;
                 }
 
@@ -77,6 +75,8 @@ namespace CustomVehicleComponents {
     }
 
     void VehicleStreamedInListener::onLoad(ICore *icore, IComponentList *components) {
+        core = icore;
+
         vehicles = components->queryComponent<IVehiclesComponent>();
         if (vehicles)
         {
@@ -84,20 +84,23 @@ namespace CustomVehicleComponents {
         }
 
         core->getEventDispatcher().addEventHandler(this);
-        players_pool = &icore->getPlayers();
-        players_pool->getPoolEventDispatcher().addEventHandler(this);
+        core->getPlayers().getPoolEventDispatcher().addEventHandler(this);
+    }
+
+    void VehicleStreamedInListener::onUnload() {
+        if (core)
+        {
+            core->getPlayers().getPoolEventDispatcher().removeEventHandler(this);
+            core->getEventDispatcher().removeEventHandler(this);
+        }
+        core = nullptr;
     }
 
     void VehicleStreamedInListener::onFree(IComponent *component) {
-      if (component == vehicles) {
-        vehicles = nullptr;
-      }
-    }
-
-    VehicleStreamedInListener::~VehicleStreamedInListener() {
-        if (vehicles) vehicles->getPoolEventDispatcher().removeEventHandler(this);
-        if (players_pool) players_pool->getPoolEventDispatcher().removeEventHandler(this);
-        if (core) core->getEventDispatcher().removeEventHandler(this);
+        if (component == vehicles) {
+            vehicles->getPoolEventDispatcher().removeEventHandler(this);
+            vehicles = nullptr;
+        }
     }
 }
 

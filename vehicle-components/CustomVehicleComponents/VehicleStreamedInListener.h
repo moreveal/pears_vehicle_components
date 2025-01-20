@@ -14,6 +14,7 @@ namespace CustomVehicleComponents {
         static constexpr int kRpcId = 164;
 
         void onLoad(ICore* icore, IComponentList* components);
+        void onUnload();
         void onFree(IComponent* component);
 
         // Inherited from SingleNetworkOutEventHandler
@@ -28,12 +29,11 @@ namespace CustomVehicleComponents {
         // Inherited from PoolEventHandler<IVehicle>
         void onPoolEntryDestroyed(IVehicle& vehicle) override;
 
-        ~VehicleStreamedInListener();
+        ~VehicleStreamedInListener() = default;
 
     private:
         std::unordered_map<IPlayer*, std::unordered_set<IVehicle*>> wPlayers;
-
-        IPlayerPool* players_pool = nullptr;
+        ICore* core;
         IVehiclesComponent* vehicles;
     };
 }

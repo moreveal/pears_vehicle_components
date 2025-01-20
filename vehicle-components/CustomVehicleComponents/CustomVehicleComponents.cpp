@@ -29,6 +29,7 @@ namespace CustomVehicleComponents {
             }
         }
 
+        vehicleStreamedInListener.onUnload();
         core = nullptr;
     }
 
