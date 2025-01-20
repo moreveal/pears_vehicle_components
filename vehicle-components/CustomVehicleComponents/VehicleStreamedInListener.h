@@ -33,8 +33,8 @@ namespace CustomVehicleComponents {
 
     private:
         std::unordered_map<IPlayer*, std::unordered_set<IVehicle*>> wPlayers;
-        ICore* core;
-        IVehiclesComponent* vehicles;
+        ICore* core = nullptr;
+        IVehiclesComponent* vehicles = nullptr;
     };
 }
 
